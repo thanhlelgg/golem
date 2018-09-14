@@ -5,6 +5,11 @@ import traceback
 
 SETTINGS_FILE_CONTENT = (
 """{
+
+// Base testcase name, do not change it in a working project unless
+// you know what you're doing
+"base_name": "_base",
+
 // Default timeout in seconds to wait until an element is present
 "search_timeout": 20,
 
@@ -64,6 +69,7 @@ REDUCED_SETTINGS_FILE_CONTENT = (
 """)
 
 DEFAULTS = [
+    ('base_name', None),
     ('search_timeout', 0),
     ('wait_displayed', False),
     ('screenshot_on_error', True),
@@ -87,6 +93,7 @@ DEFAULTS = [
 
 def create_global_settings_file(testdir):
     """Create a new global settings file"""
+    print("Create global settings file")
     settings_path = os.path.join(testdir, 'settings.json')
     with open(settings_path, 'a') as settings_file:
         settings_file.write(SETTINGS_FILE_CONTENT)

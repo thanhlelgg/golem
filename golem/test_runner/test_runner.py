@@ -5,7 +5,7 @@ import importlib
 import time
 import traceback
 
-from golem.core import report, utils
+from golem.core import report, utils, settings_manager
 from golem.test_runner.test_runner_utils import import_page_into_test_module
 
 
@@ -90,18 +90,31 @@ def run_test(workspace, project, test_name, test_data, browser,
     sys.path.append(os.path.join(workspace, 'projects', project))
 
     test_module = None
-
+    test_base = settings_manager.get_project_settings(workspace, project)['base_name']
     try:
         if '/' in test_name:
             test_name = test_name.replace('/', '.')
+            
+        test_base_fullpath = test_name.replace(test_name.split(".")[-1], test_base)
         test_module = importlib.import_module(
             'projects.{0}.tests.{1}'.format(project, test_name))
+
+        base_module = importlib.import_module(
+            'projects.{0}.tests.{1}'.format(project, test_base_fullpath))
+        setattr(test_module, test_base, base_module)
 
         # import each page into the test_module
         if hasattr(test_module, 'pages'):
             for page in test_module.pages:
                 test_module = import_page_into_test_module(project, test_module,
                                                            page)
+        if hasattr(base_module, 'pages'):
+            for page in base_module.pages:
+                test_module = import_page_into_test_module(project, test_module,
+                                                           page)
+                base_module = import_page_into_test_module(project, base_module,
+                                                           page)
+
         # import logger into the test module
         setattr(test_module, 'logger', execution.logger)
         # import actions into the test module

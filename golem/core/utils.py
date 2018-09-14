@@ -16,9 +16,13 @@ from golem.core import settings_manager
 from golem.core import file_manager
 
 
-def get_test_cases(workspace, project):
+def get_test_cases(workspace, project, is_suite_view=False):
     path = os.path.join(workspace, 'projects', project, 'tests')
-    test_cases = file_manager.generate_file_structure_dict(path)
+    if is_suite_view:
+        test_base = settings_manager.get_project_settings(workspace, project)['base_name']
+        test_cases = file_manager.generate_file_structure_dict(full_path=path, exclude_name=test_base+".py")
+    else:
+        test_cases = file_manager.generate_file_structure_dict(full_path=path)
     return test_cases
 
 
